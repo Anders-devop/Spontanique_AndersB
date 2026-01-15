@@ -356,6 +356,7 @@ Added comprehensive mappings:
 - `nightlife`: ['club', 'bar', 'party', 'dancing', 'drinks', 'pub', 'lounge', 'dj', 'disco', 'cocktails']
 - `social`: ['meetup', 'networking', 'gathering', 'community', 'friends', 'people', 'connect', 'dating']
 - `show`: ['concert', 'theater', 'comedy', 'opera', 'ballet', 'magic'] (for spectator performances)
+- `drinks`: ['cocktail', 'cocktails', 'mixology', 'bar', 'pub', 'lounge', 'nightlife', 'alcohol', 'beverage'] (new primary key)
 - `beer`, `wine`, `coffee`: Specific drink-related terms
 - Expanded `sport`/`sports` with specific sports (football, soccer, basketball, tennis, running, fitness)
 
@@ -566,6 +567,7 @@ Added comprehensive mappings:
 - `src/components/ui/select.tsx` (transparency fix)
 - `src/components/ui/slider.tsx` (dual-handle price range)
 - `src/components/filters/DateFilter.tsx` (date range filter with validation, matching PriceFilter pattern)
+- `src/pages/Events.tsx` (collapsible filter sidebar on desktop)
 - `src/main.tsx` (dynamic locale detection)
 
 **Key Innovations:**
