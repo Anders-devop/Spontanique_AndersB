@@ -101,7 +101,7 @@ export const mockEvents: EventWithTickets[] = [
     event_tickets: [{ tickets_left: 80 }],
     embedding: null,
   },
-  
+
   // Culture Events
   {
     id: '5',
@@ -172,7 +172,7 @@ export const mockEvents: EventWithTickets[] = [
     event_tickets: [{ tickets_left: 150 }],
     embedding: null,
   },
-  
+
   // Food & Dining Events
   {
     id: '8',
@@ -243,7 +243,7 @@ export const mockEvents: EventWithTickets[] = [
     event_tickets: [{ tickets_left: 12 }],
     embedding: null,
   },
-  
+
   // Fitness & Wellness Events
   {
     id: '11',
@@ -314,7 +314,7 @@ export const mockEvents: EventWithTickets[] = [
     event_tickets: [{ tickets_left: 20 }],
     embedding: null,
   },
-  
+
   // Sports Events
   {
     id: '14',
@@ -362,7 +362,7 @@ export const mockEvents: EventWithTickets[] = [
     event_tickets: [{ tickets_left: 200 }],
     embedding: null,
   },
-  
+
   // Business & Networking
   {
     id: '16',
@@ -410,7 +410,7 @@ export const mockEvents: EventWithTickets[] = [
     event_tickets: [{ tickets_left: 300 }],
     embedding: null,
   },
-  
+
   // Entertainment
   {
     id: '18',
@@ -504,7 +504,7 @@ export const mockEvents: EventWithTickets[] = [
     event_tickets: [{ tickets_left: 40 }],
     embedding: null,
   },
-  
+
   // Social Events
   {
     id: '22',
@@ -552,7 +552,7 @@ export const mockEvents: EventWithTickets[] = [
     event_tickets: [{ tickets_left: 100 }],
     embedding: null,
   },
-  
+
   // More Music Events (different genres)
   {
     id: '24',
@@ -646,7 +646,7 @@ export const mockEvents: EventWithTickets[] = [
     event_tickets: [{ tickets_left: 120 }],
     embedding: null,
   },
-  
+
   // More Culture Events
   {
     id: '28',
@@ -717,7 +717,7 @@ export const mockEvents: EventWithTickets[] = [
     event_tickets: [{ tickets_left: 70 }],
     embedding: null,
   },
-  
+
   // Nightlife
   {
     id: '31',
@@ -788,7 +788,7 @@ export const mockEvents: EventWithTickets[] = [
     event_tickets: [{ tickets_left: 250 }],
     embedding: null,
   },
-  
+
   // More Fitness
   {
     id: '34',
@@ -859,7 +859,7 @@ export const mockEvents: EventWithTickets[] = [
     event_tickets: [{ tickets_left: 15 }],
     embedding: null,
   },
-  
+
   // More Food
   {
     id: '37',
@@ -930,7 +930,7 @@ export const mockEvents: EventWithTickets[] = [
     event_tickets: [{ tickets_left: 20 }],
     embedding: null,
   },
-  
+
   // More Entertainment
   {
     id: '40',
@@ -1001,7 +1001,7 @@ export const mockEvents: EventWithTickets[] = [
     event_tickets: [{ tickets_left: 50 }],
     embedding: null,
   },
-  
+
   // Additional variety events
   {
     id: '43',

@@ -22,16 +22,31 @@ interface AISearchBarProps {
   placeholder?: string;
   initialPrompt?: string;
   showClearButton?: boolean;
+  aiResultCount?: number;
+  filteredResultCount?: number;
+  isAiSearchActive?: boolean;
+  activeFilters?: {
+    selectedCategory?: string;
+    priceRange?: [number, number];
+    selectedDate?: string;
+    searchLocation?: string;
+    showOnlyPartnerEvents?: boolean;
+  };
 }
 
-export const AISearchBar = ({ 
-  onAISearch, 
-  placeholder = "Try: 'jazz music tonight' or 'cheap yoga classes'...", 
-  initialPrompt, 
-  showClearButton = true 
+export const AISearchBar = ({
+  onAISearch,
+  placeholder = "Try: 'jazz music tonight' or 'cheap yoga classes'...",
+  initialPrompt,
+  showClearButton = true,
+  aiResultCount = 0,
+  filteredResultCount = 0,
+  isAiSearchActive = false,
+  activeFilters
 }: AISearchBarProps) => {
   const [prompt, setPrompt] = useState(initialPrompt || '');
   const [lastExplanation, setLastExplanation] = useState('');
+  const [baseExplanation, setBaseExplanation] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const { analyzePrompt, isAnalyzing } = useAISearch();
 
@@ -39,30 +54,71 @@ export const AISearchBar = ({
     setPrompt(initialPrompt || '');
   }, [initialPrompt]);
 
+  // [RATIONALE]: Dynamic blue box updates - text changes when filters are applied
+  // Updates the SAME blue box (no separate yellow box) with filter details
+  useEffect(() => {
+    if (!isAiSearchActive || !baseExplanation || aiResultCount === 0) return;
+
+    // Build filter details if filters are active
+    const filters: string[] = [];
+
+    if (activeFilters?.selectedCategory && activeFilters.selectedCategory !== 'All') {
+      filters.push(`category: ${activeFilters.selectedCategory}`);
+    }
+    if (activeFilters?.priceRange && (activeFilters.priceRange[0] > 0 || activeFilters.priceRange[1] < 2000)) {
+      filters.push(`price: ${activeFilters.priceRange[0]}-${activeFilters.priceRange[1]} DKK`);
+    }
+    if (activeFilters?.selectedDate) {
+      filters.push(`date: ${new Date(activeFilters.selectedDate).toLocaleDateString()}`);
+    }
+    if (activeFilters?.searchLocation) {
+      filters.push(`location: ${activeFilters.searchLocation}`);
+    }
+    if (activeFilters?.showOnlyPartnerEvents) {
+      filters.push('partner events only');
+    }
+
+    // Update blue box text based on filter state
+    if (filteredResultCount < aiResultCount && filters.length > 0) {
+      // Filters are reducing results
+      setLastExplanation(`Found ${aiResultCount} events, showing ${filteredResultCount} after applying filters (${filters.join(', ')})`);
+    } else if (filters.length > 0 && filteredResultCount === aiResultCount) {
+      // Filters active but not reducing results
+      setLastExplanation(`${baseExplanation} (filters: ${filters.join(', ')})`);
+    } else {
+      // No filters active, show original message
+      setLastExplanation(baseExplanation);
+    }
+  }, [aiResultCount, filteredResultCount, isAiSearchActive, activeFilters, baseExplanation]);
+
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!prompt.trim() || isAnalyzing) return;
 
     console.log('Starting AI search with prompt:', prompt);
     setIsSearching(true);
-    
+
     try {
       const result = await analyzePrompt(prompt);
       if (result) {
         console.log('✅ AI search successful:', result);
-        
+
         // Show smart feedback based on search results
+        // [RATIONALE]: Handle optional totalFound field with nullish coalescing to prevent TypeScript errors
         let feedbackMessage = result.explanation;
-        if (result.totalFound === 0) {
+        const foundCount = result.totalFound ?? 0;
+
+        if (foundCount === 0) {
           feedbackMessage = `No events found for "${prompt}". Try adjusting your search or check back later!`;
-        } else if (result.totalFound > 0 && result.totalFound <= 3) {
-          feedbackMessage = `Found ${result.totalFound} perfect match${result.totalFound > 1 ? 'es' : ''} for "${prompt}"`;
-        } else if (result.totalFound > 20) {
-          feedbackMessage = `Found ${result.totalFound} events! Showing the most relevant ones first.`;
+        } else if (foundCount > 0 && foundCount <= 3) {
+          feedbackMessage = `Found ${foundCount} perfect match${foundCount > 1 ? 'es' : ''} for "${prompt}"`;
+        } else if (foundCount > 20) {
+          feedbackMessage = `Found ${foundCount} events! Showing the most relevant ones first.`;
         }
-        
+
+        setBaseExplanation(feedbackMessage);
         setLastExplanation(feedbackMessage);
-        
+
         onAISearch({
           categories: result.categories,
           priceRange: [result.price_range.min, result.price_range.max],
@@ -88,6 +144,7 @@ export const AISearchBar = ({
   const handleClear = () => {
     setPrompt('');
     setLastExplanation('');
+    setBaseExplanation('');
     setIsSearching(false);
     onAISearch({
       categories: [],
@@ -99,6 +156,55 @@ export const AISearchBar = ({
       prompt: "",
       location: "",
     });
+  };
+
+  // [RATIONALE]: Handle example prompt clicks - immediately execute search
+  // Users expect quick actions when clicking examples, not just filling the input
+  const handleExampleClick = async (examplePrompt: string) => {
+    if (isAnalyzing) return;
+
+    setPrompt(examplePrompt);
+    setIsSearching(true);
+
+    try {
+      const result = await analyzePrompt(examplePrompt);
+      if (result) {
+        console.log('✅ Example search successful:', result);
+
+        // [RATIONALE]: Same feedback logic as manual search
+        let feedbackMessage = result.explanation;
+        const foundCount = result.totalFound ?? 0;
+
+        if (foundCount === 0) {
+          feedbackMessage = `No events found for "${examplePrompt}". Try adjusting your search or check back later!`;
+        } else if (foundCount > 0 && foundCount <= 3) {
+          feedbackMessage = `Found ${foundCount} perfect match${foundCount > 1 ? 'es' : ''} for "${examplePrompt}"`;
+        } else if (foundCount > 20) {
+          feedbackMessage = `Found ${foundCount} events! Showing the most relevant ones first.`;
+        }
+
+        setBaseExplanation(feedbackMessage);
+        setLastExplanation(feedbackMessage);
+
+        onAISearch({
+          categories: result.categories,
+          priceRange: [result.price_range.min, result.price_range.max],
+          timePreference: result.time_preference,
+          mood: result.mood,
+          explanation: result.explanation,
+          searchKeywords: result.keywords.join(' '),
+          prompt: examplePrompt,
+          location: result.location,
+          events: result.events,
+          totalFound: result.totalFound
+        });
+      }
+    } catch (error) {
+      console.error('Example search failed:', error);
+      setLastExplanation('Search failed. Please try again.');
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   const examplePrompts = [
@@ -130,8 +236,8 @@ export const AISearchBar = ({
             />
           </div>
           <div className="flex gap-2">
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={!prompt.trim() || isLoading}
               className="h-10 sm:h-12 px-4 sm:px-6 bg-primary hover:bg-primary/90 text-sm sm:text-base flex-1 sm:flex-none min-w-[100px]"
             >
@@ -149,7 +255,7 @@ export const AISearchBar = ({
               )}
             </Button>
             {(prompt || lastExplanation) && !isLoading && showClearButton && (
-              <Button 
+              <Button
                 type="button"
                 variant="outline"
                 onClick={handleClear}
@@ -189,7 +295,7 @@ export const AISearchBar = ({
                 <Badge
                   variant="outline"
                   className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors px-3 py-2 text-xs justify-center text-center w-full"
-                  onClick={() => setPrompt(example)}
+                  onClick={() => handleExampleClick(example)}
                 >
                   {example}
                 </Badge>

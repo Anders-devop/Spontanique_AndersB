@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { AISearchResult } from '@/types/event';
-import { searchEvents } from '@/lib/searchEngine';
+// [FIX 1]: Importer parseTimePreference hjælperen
+import { searchEvents, parseTimePreference } from '@/lib/searchEngine';
 import { mockEvents } from '@/lib/mockData';
 import { toast } from 'sonner';
 
 // Configuration - Update these values for your Supabase project
-const SUPABASE_URL = 'https://plrhuuatwiwjsnbpicfh.supabase.co'; // e.g., 'https://xxxxx.supabase.co'
+const SUPABASE_URL = 'https://plrhuuatwiwjsnbpicfh.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBscmh1dWF0d2l3anNuYnBpY2ZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgyNDkzNzAsImV4cCI6MjA4MzgyNTM3MH0.yoIbJlf8xoIoEeqHkweZYYBBx88I_ulu8EyrHm4x020';
-console.log('hej')
+
 export const useAISearch = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
@@ -35,18 +36,32 @@ export const useAISearch = () => {
       const analysis = await response.json();
       console.log('🤖 AI analysis:', analysis);
 
-      // Search events using the AI-extracted parameters
+      // [FIX 2]: Konverter string-dato (fra JSON) til Date Objekter (til SearchEngine)
+      // Vi bruger din eksisterende helper funktion til dette.
+      // Hvis AI'en returnerer "tonight", laver denne funktion det om til { start: Date, end: Date }
+      // [FIX 2]: Konverter string-dato (fra JSON) til Date Objekter
+      let timeFilterObj: { start?: Date; end?: Date } | undefined = undefined;
+
+      const timeString = analysis.time_preference || analysis.time_filter;
+
+      if (timeString && timeString !== 'anytime') {
+        // Vi bruger || undefined for at konvertere 'null' til 'undefined'
+        // så TypeScript bliver glad.
+        const parsed = parseTimePreference(timeString);
+        timeFilterObj = parsed || undefined;
+      }
+
       const searchResults = searchEvents(mockEvents, prompt, {
-        categories: analysis.categories?.length > 0 ? analysis.categories : undefined,
         priceRange: analysis.price_range,
+        timeFilter: timeFilterObj, // Nu er den garanteret undefined (ikke null)
       });
 
       // Generate explanation using actual search results length
       const explanation = generateExplanation(
         searchResults.length,
         prompt,
-        analysis.categories,
-        analysis.time_preference
+        analysis.categories || [],
+        analysis.time_preference || 'anytime'
       );
 
       const result: AISearchResult = {
@@ -72,8 +87,6 @@ export const useAISearch = () => {
         keywords: result.keywords,
       });
 
-      // Show toast with AI search results count
-      // Note: This is the AI's initial result count; manual filters may reduce the final count
       toast.success('🧠 Smart AI Search Complete', {
         description: `${searchResults.length} relevant event${searchResults.length !== 1 ? 's' : ''} found`,
       });

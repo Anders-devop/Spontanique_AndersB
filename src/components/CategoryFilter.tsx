@@ -1,4 +1,3 @@
-import React from "react";
 import { CategorySelect } from "./filters/CategorySelect";
 import { PriceFilter } from "./filters/PriceFilter";
 import { DateFilter } from "./filters/DateFilter";
@@ -43,19 +42,20 @@ export const CategoryFilter = ({
     }
   };
 
-  // Check if any filters are active (different from default values)
-  const hasActiveFilters = 
+  // [RATIONALE]: Check if any filters are active (different from default values)
+  // Using !! to ensure boolean type (TypeScript requirement for hasActiveFilters prop)
+  const hasActiveFilters =
     selected !== "All" ||
     priceRange[0] !== 0 ||
     priceRange[1] !== 2000 ||
     selectedDate !== "" ||
     showOnlyPartnerEvents ||
-    (searchLocation && searchLocation.trim() !== "");
+    !!(searchLocation && searchLocation.trim() !== "");
 
   return (
     <div className="space-y-6">
       <CategorySelect selected={selected} onSelect={onSelect} />
-      
+
       {/* Location Search */}
       {onLocationChange && (
         <div className="space-y-2">
@@ -75,10 +75,10 @@ export const CategoryFilter = ({
           </div>
         </div>
       )}
-      
+
       <PriceFilter priceRange={priceRange} onPriceRangeChange={onPriceRangeChange} />
       <DateFilter selectedDate={selectedDate} onDateChange={onDateChange} />
-      
+
       <div className="flex items-center space-x-2">
         <Switch
           id="partner-events"
@@ -89,8 +89,8 @@ export const CategoryFilter = ({
           Only show partner events
         </Label>
       </div>
-      
-      <ResetFilters hasActiveFilters={hasActiveFilters} onReset={handleReset} />
+
+      <ResetFilters hasActiveFilters={!!hasActiveFilters} onReset={handleReset} />
     </div>
   );
 };

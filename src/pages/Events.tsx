@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AISearchBar } from '@/components/search/AISearchBar';
 import { EventsList } from '@/components/events/EventsList';
 import { CategoryFilter } from '@/components/CategoryFilter';
 import { useFilteredEvents } from '@/hooks/useFilteredEvents';
 import { mockEvents } from '@/lib/mockData';
 import { EventWithTickets } from '@/types/event';
-import { Filter } from 'lucide-react';
+import { Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -18,6 +18,20 @@ const Events = () => {
   const [aiSearchResults, setAiSearchResults] = useState<EventWithTickets[]>([]);
   const [isAiSearchActive, setIsAiSearchActive] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  // [RATIONALE]: Persist sidebar state in localStorage for better UX
+  // Users who collapse the sidebar likely want it collapsed on return visits
+  useEffect(() => {
+    const saved = localStorage.getItem('sidebarOpen');
+    if (saved !== null) {
+      setIsSidebarOpen(saved === 'true');
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('sidebarOpen', String(isSidebarOpen));
+  }, [isSidebarOpen]);
 
   // Use AI search results if active, otherwise use all mock events
   const eventsToFilter = isAiSearchActive ? aiSearchResults : mockEvents;
@@ -89,7 +103,19 @@ const Events = () => {
               </p>
             </motion.div>
 
-            <AISearchBar onAISearch={handleAISearch} />
+            <AISearchBar
+              onAISearch={handleAISearch}
+              aiResultCount={aiSearchResults.length}
+              filteredResultCount={filteredEvents.length}
+              isAiSearchActive={isAiSearchActive}
+              activeFilters={{
+                selectedCategory,
+                priceRange,
+                selectedDate,
+                searchLocation,
+                showOnlyPartnerEvents
+              }}
+            />
 
             {isAiSearchActive && (
               <motion.div
@@ -108,45 +134,30 @@ const Events = () => {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Filters Sidebar - Desktop */}
-          <div className="hidden lg:block w-64 flex-shrink-0">
+        <div className="flex flex-col lg:flex-row gap-6">
+
+          {/* Desktop: Collapsible Sidebar */}
+          <aside className={`
+            hidden lg:block
+            transition-all duration-300 ease-in-out
+            ${isSidebarOpen ? 'lg:w-64' : 'lg:w-12'}
+            flex-shrink-0
+          `}>
             <div className="sticky top-4">
-              <h2 className="text-lg font-semibold mb-4">Filters</h2>
-              <CategoryFilter
-                selected={selectedCategory}
-                onSelect={setSelectedCategory}
-                priceRange={priceRange}
-                onPriceRangeChange={setPriceRange}
-                selectedDate={selectedDate}
-                onDateChange={setSelectedDate}
-                showOnlyPartnerEvents={showOnlyPartnerEvents}
-                onShowOnlyPartnerEventsChange={setShowOnlyPartnerEvents}
-                searchLocation={searchLocation}
-                onLocationChange={setSearchLocation}
-              />
-            </div>
-          </div>
-
-          {/* Mobile Filter Button */}
-          <div className="lg:hidden">
-            <Button
-              onClick={() => setIsFilterOpen(!isFilterOpen)}
-              variant="outline"
-              className="w-full"
-            >
-              <Filter className="w-4 h-4 mr-2" />
-              Filters
-            </Button>
-
-            <AnimatePresence>
-              {isFilterOpen && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="mt-4 overflow-hidden"
-                >
+              {isSidebarOpen ? (
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h2 className="text-lg font-semibold">Filters</h2>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setIsSidebarOpen(false)}
+                      className="h-8 w-8 p-0"
+                      title="Collapse sidebar"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </Button>
+                  </div>
                   <CategoryFilter
                     selected={selectedCategory}
                     onSelect={setSelectedCategory}
@@ -159,13 +170,63 @@ const Events = () => {
                     searchLocation={searchLocation}
                     onLocationChange={setSearchLocation}
                   />
+                </div>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsSidebarOpen(true)}
+                  className="h-10 w-10 p-0"
+                  title="Expand sidebar"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              )}
+            </div>
+          </aside>
+
+          {/* Mobile: Full-width Collapsible (Original) */}
+          <div className="lg:hidden w-full">
+            <Button
+              onClick={() => setIsFilterOpen(!isFilterOpen)}
+              variant="outline"
+              className="w-full"
+            >
+              <Filter className="w-4 h-4 mr-2" />
+              {isFilterOpen ? 'Hide Filters' : 'Show Filters'}
+            </Button>
+
+            <AnimatePresence>
+              {isFilterOpen && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="mt-4 overflow-hidden"
+                >
+                  <div className="bg-card border rounded-lg p-6">
+                    <h2 className="text-lg font-semibold mb-4">Filters</h2>
+                    <CategoryFilter
+                      selected={selectedCategory}
+                      onSelect={setSelectedCategory}
+                      priceRange={priceRange}
+                      onPriceRangeChange={setPriceRange}
+                      selectedDate={selectedDate}
+                      onDateChange={setSelectedDate}
+                      showOnlyPartnerEvents={showOnlyPartnerEvents}
+                      onShowOnlyPartnerEventsChange={setShowOnlyPartnerEvents}
+                      searchLocation={searchLocation}
+                      onLocationChange={setSearchLocation}
+                    />
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
 
           {/* Events Grid */}
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <div className="mb-6">
               <h2 className="text-2xl font-bold">
                 {isAiSearchActive ? 'AI Search Results' : 'All Events'}

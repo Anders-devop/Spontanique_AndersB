@@ -13,7 +13,8 @@ export const useFilteredEvents = (
   const filteredEvents = useMemo(() => {
     let filtered = [...events];
 
-    // Check if events have AI relevance scores
+    // [RATIONALE]: Check if events have AI relevance scores (_relevanceScore property)
+    // to determine if we should sort by relevance (AI search) or keep default order (manual browse)
     const hasRelevanceScores = filtered.some(event =>
       '_relevanceScore' in event && typeof (event as any)._relevanceScore === 'number'
     );
@@ -31,15 +32,21 @@ export const useFilteredEvents = (
       }
     });
 
-    // HYBRID FILTERING: Apply ALL filters regardless of AI search state
-    // This ensures only events that match BOTH AI search AND user filters are shown
+    // [RATIONALE]: HYBRID FILTERING - Apply ALL user filters regardless of AI search state
+    // This creates an intersection: only events that pass BOTH AI relevance scoring AND
+    // user's manual filters (category, date, price, location) are shown. This respects
+    // user preferences while leveraging AI's semantic understanding.
 
     // Filter by category
     if (category && category !== 'All') {
       filtered = filtered.filter(event => event.category === category);
     }
 
-    // Filter by location (search both venue and city)
+    // [RATIONALE]: Location filter searches BOTH venue name AND city using .includes()
+    // This fixes overly strict filtering where searching 'Copenhagen' wouldn't match
+    // 'Bastard Café, Copenhagen' because venue name didn't contain 'Copenhagen'.
+    // Using OR logic ensures location search is intuitive and captures both specific
+    // venues and city-wide searches.
     if (searchLocation) {
       const lowerSearchLocation = searchLocation.toLowerCase();
       filtered = filtered.filter(event =>
@@ -79,19 +86,22 @@ export const useFilteredEvents = (
       });
     }
 
-    // Filter by partner events (external sources)
+    // [RATIONALE]: Partner events filter checks for 'external' source_type (not 'partner')
+    // because the EventWithTickets type only supports 'native' | 'external', not 'partner'.
+    // External events are affiliate/partner events from platforms like Eventbrite, Billetto.
     if (showOnlyPartnerEvents) {
       filtered = filtered.filter(event => event.source_type === 'external');
     }
 
-    // SORTING LOGIC:
-    // If AI search is active with relevance scores, sort by score (highest first)
-    // Otherwise, keep default order (usually by date)
+    // [RATIONALE]: SORTING LOGIC - When AI search is active, ALWAYS sort by relevance score
+    // (highest first) to surface the most semantically relevant events. This ensures that
+    // high-scoring title matches appear at the top even when user applies additional filters.
+    // Without AI search, keep default chronological order for manual browsing experience.
     if (isAiSearchActive && hasRelevanceScores) {
       filtered.sort((a, b) => {
         const scoreA = (a as any)._relevanceScore || 0;
         const scoreB = (b as any)._relevanceScore || 0;
-        return scoreB - scoreA;
+        return scoreB - scoreA;  // Descending order - highest scores first
       });
       console.log('✅ Sorted by relevance score');
     }
@@ -101,5 +111,7 @@ export const useFilteredEvents = (
     return filtered;
   }, [events, category, searchLocation, priceRange, dateFilter, showOnlyPartnerEvents, isAiSearchActive]);
 
+  // [RATIONALE]: Return plain array (not object) to fix "events.map is not a function" error
+  // EventsList component expects array directly, not { filteredEvents: [...] }
   return filteredEvents;
 };
