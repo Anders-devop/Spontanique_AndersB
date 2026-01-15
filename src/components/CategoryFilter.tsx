@@ -12,8 +12,10 @@ interface CategoryFilterProps {
   onSelect: (category: string) => void;
   priceRange: [number, number];
   onPriceRangeChange: (range: [number, number]) => void;
-  dateRange: [string, string]; // Changed from selectedDate: string
-  onDateRangeChange: (range: [string, string]) => void; // Changed from onDateChange
+  // [RATIONALE]: Date range filter - changed from single date to from-to range
+  // Matches PriceFilter UX pattern for consistency and better user experience
+  dateRange: [string, string];
+  onDateRangeChange: (range: [string, string]) => void;
   showOnlyPartnerEvents: boolean;
   onShowOnlyPartnerEventsChange: (show: boolean) => void;
   searchLocation?: string;

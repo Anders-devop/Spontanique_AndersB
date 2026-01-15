@@ -55,6 +55,9 @@ export const SYNONYM_MAP: Record<string, string[]> = {
   'beer': ['brewery', 'pub', 'bar', 'drinks', 'craft beer', 'ale', 'lager', 'brewing'],
   'wine': ['winery', 'tasting', 'vineyard', 'sommelier', 'drinks', 'vino'],
   'coffee': ['café', 'espresso', 'barista', 'coffeehouse', 'latte', 'cappuccino'],
+  // [RATIONALE]: Added 'drinks' as primary key to enable direct search for drink-related events
+  // Users searching "drinks" should find cocktail workshops, bars, pubs, etc.
+  'drinks': ['cocktail', 'cocktails', 'mixology', 'bar', 'pub', 'lounge', 'nightlife', 'alcohol', 'beverage'],
   // [RATIONALE]: Added 'show' as primary key for spectator performances
   // 'Show' encompasses any performance where audience watches (not participatory)
   // Includes concerts, theater, comedy, opera, ballet, magic - excludes dance classes, workshops, parties
@@ -128,6 +131,10 @@ const ACTIVITY_CATEGORY_MAP: Record<string, string> = {
   'disco': 'nightlife',
   'dancing': 'nightlife',
   'club': 'nightlife',
+  'cocktail': 'nightlife',
+  'cocktails': 'nightlife',
+  'mixology': 'nightlife',
+  'drinks': 'nightlife',
   // Sports activities
   'football': 'sports',
   'soccer': 'sports',

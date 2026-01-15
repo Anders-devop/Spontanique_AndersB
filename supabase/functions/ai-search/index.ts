@@ -1,7 +1,8 @@
+// @ts-nocheck - Deno runtime types (not available in Node.js TypeScript)
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.203.0/http/server.ts";
 
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+const openAIApiKey = typeof Deno !== "undefined" && Deno.env ? Deno.env.get('OPENAI_API_KEY') : undefined;
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -64,9 +65,9 @@ Examples:
 
     const data = await response.json();
     const content = data.choices[0].message.content;
-    
+
     console.log('🤖 OpenAI response:', content);
-    
+
     // Parse the JSON response from OpenAI
     let analysis;
     try {
@@ -95,7 +96,7 @@ Examples:
   } catch (error) {
     console.error('❌ Error in ai-search function:', error);
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         error: error.message,
         // Fallback response
         categories: [],

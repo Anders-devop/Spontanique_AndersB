@@ -12,7 +12,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 const Events = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 2000]);
-  const [dateRange, setDateRange] = useState<[string, string]>(['', '']); // Changed from selectedDate
+  // [RATIONALE]: Date range filter - changed from single date to from-to range
+  // Matches PriceFilter UX pattern for consistency (from only, to only, or both)
+  const [dateRange, setDateRange] = useState<[string, string]>(['', '']);
   const [showOnlyPartnerEvents, setShowOnlyPartnerEvents] = useState(false);
   const [searchLocation, setSearchLocation] = useState<string>('');
   const [aiSearchResults, setAiSearchResults] = useState<EventWithTickets[]>([]);

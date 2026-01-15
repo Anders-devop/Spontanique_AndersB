@@ -6,8 +6,9 @@ import { mockEvents } from '@/lib/mockData';
 import { toast } from 'sonner';
 
 // Configuration - Update these values for your Supabase project
-const SUPABASE_URL = 'https://plrhuuatwiwjsnbpicfh.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBscmh1dWF0d2l3anNuYnBpY2ZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgyNDkzNzAsImV4cCI6MjA4MzgyNTM3MH0.yoIbJlf8xoIoEeqHkweZYYBBx88I_ulu8EyrHm4x020';
+// See README.md for setup instructions
+const SUPABASE_URL = 'https://xxxxx.supabase.co'; // Your project URL
+const SUPABASE_ANON_KEY = 'eyJhb...'; // Your anon key from Settings → API
 
 export const useAISearch = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);

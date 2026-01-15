@@ -10,6 +10,11 @@ interface DateFilterProps {
 export const DateFilter: React.FC<DateFilterProps> = ({ dateRange, onDateRangeChange }) => {
   const [fromDate, toDate] = dateRange;
 
+  // [RATIONALE]: Validate date range - prevent impossible date combinations
+  // If toDate is set, fromDate cannot be later than toDate
+  // If fromDate is set, toDate cannot be earlier than fromDate
+  const isInvalidRange = fromDate && toDate && fromDate > toDate;
+
   return (
     <div className="space-y-3">
       <Label className="text-sm font-medium">Date Range</Label>
@@ -22,8 +27,17 @@ export const DateFilter: React.FC<DateFilterProps> = ({ dateRange, onDateRangeCh
             id="from-date"
             type="date"
             value={fromDate}
-            onChange={(e) => onDateRangeChange([e.target.value, toDate])}
-            className="w-full"
+            max={toDate || undefined} // Cannot select date later than toDate
+            onChange={(e) => {
+              const newFromDate = e.target.value;
+              // If new fromDate is after toDate, clear toDate to prevent invalid range
+              if (toDate && newFromDate > toDate) {
+                onDateRangeChange([newFromDate, '']);
+              } else {
+                onDateRangeChange([newFromDate, toDate]);
+              }
+            }}
+            className={`w-full ${isInvalidRange ? 'border-red-500' : ''}`}
           />
         </div>
         <div>
@@ -34,14 +48,23 @@ export const DateFilter: React.FC<DateFilterProps> = ({ dateRange, onDateRangeCh
             id="to-date"
             type="date"
             value={toDate}
-            onChange={(e) => onDateRangeChange([fromDate, e.target.value])}
-            className="w-full"
+            min={fromDate || undefined} // Cannot select date earlier than fromDate
+            onChange={(e) => {
+              const newToDate = e.target.value;
+              // If new toDate is before fromDate, clear fromDate to prevent invalid range
+              if (fromDate && newToDate < fromDate) {
+                onDateRangeChange(['', newToDate]);
+              } else {
+                onDateRangeChange([fromDate, newToDate]);
+              }
+            }}
+            className={`w-full ${isInvalidRange ? 'border-red-500' : ''}`}
           />
         </div>
       </div>
-      {(fromDate || toDate) && (
-        <p className="text-xs text-muted-foreground">
-          {fromDate || 'Any'} - {toDate || 'Any'}
+      {isInvalidRange && (
+        <p className="text-xs text-red-500">
+          Invalid date range: From date cannot be later than To date
         </p>
       )}
     </div>

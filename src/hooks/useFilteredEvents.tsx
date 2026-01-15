@@ -60,26 +60,29 @@ export const useFilteredEvents = (
       event => event.price >= priceRange[0] && event.price <= priceRange[1]
     );
 
-    // Filter by date range
+    // [RATIONALE]: Filter by date range - supports flexible from-to filtering
+    // Matches PriceFilter UX pattern for consistency (from only, to only, or both)
+    // If fromDate is set, events must be on or after that date (start of day)
+    // If toDate is set, events must be on or before that date (end of day)
     const [fromDate, toDate] = dateRange;
     if (fromDate || toDate) {
       filtered = filtered.filter(event => {
         const eventDate = new Date(event.event_date);
-        
+
         // If fromDate is set, event must be on or after fromDate
         if (fromDate) {
           const from = new Date(fromDate);
           from.setHours(0, 0, 0, 0); // Start of day
           if (eventDate < from) return false;
         }
-        
+
         // If toDate is set, event must be on or before toDate
         if (toDate) {
           const to = new Date(toDate);
           to.setHours(23, 59, 59, 999); // End of day
           if (eventDate > to) return false;
         }
-        
+
         return true;
       });
     }
