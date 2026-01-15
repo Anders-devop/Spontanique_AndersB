@@ -557,7 +557,7 @@ Added comprehensive mappings:
 
 ## Summary
 
-**Total Changes:** 22 major fixes across 8 files
+**Total Changes:** 22 major fixes across 9 files
 
 **Files Modified:**
 - `src/lib/searchEngine.ts` (core algorithm: scoring, expansion, ranking)
