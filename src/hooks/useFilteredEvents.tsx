@@ -6,7 +6,7 @@ export const useFilteredEvents = (
   category: string,
   searchLocation: string,
   priceRange: [number, number],
-  dateFilter: string,
+  dateRange: [string, string], // Changed from dateFilter: string
   showOnlyPartnerEvents: boolean,
   isAiSearchActive: boolean = false
 ) => {
@@ -25,7 +25,7 @@ export const useFilteredEvents = (
       inputEvents: events.length,
       activeFilters: {
         category: category !== 'All' ? category : 'none',
-        date: dateFilter || 'none',
+        date: dateRange[0] || dateRange[1] ? `${dateRange[0] || 'Any'} - ${dateRange[1] || 'Any'}` : 'none', // Updated
         price: `${priceRange[0]}-${priceRange[1]}`,
         location: searchLocation || 'none',
         partnerOnly: showOnlyPartnerEvents
@@ -60,29 +60,27 @@ export const useFilteredEvents = (
       event => event.price >= priceRange[0] && event.price <= priceRange[1]
     );
 
-    // Filter by date
-    if (dateFilter && dateFilter !== 'all' && dateFilter !== '') {
-      const now = new Date();
+    // Filter by date range
+    const [fromDate, toDate] = dateRange;
+    if (fromDate || toDate) {
       filtered = filtered.filter(event => {
         const eventDate = new Date(event.event_date);
-
-        switch (dateFilter) {
-          case 'today':
-            return eventDate.toDateString() === now.toDateString();
-          case 'tomorrow':
-            const tomorrow = new Date(now);
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            return eventDate.toDateString() === tomorrow.toDateString();
-          case 'week':
-            const weekFromNow = new Date(now);
-            weekFromNow.setDate(weekFromNow.getDate() + 7);
-            return eventDate >= now && eventDate <= weekFromNow;
-          case 'weekend':
-            const day = eventDate.getDay();
-            return (day === 0 || day === 6) && eventDate >= now;
-          default:
-            return true;
+        
+        // If fromDate is set, event must be on or after fromDate
+        if (fromDate) {
+          const from = new Date(fromDate);
+          from.setHours(0, 0, 0, 0); // Start of day
+          if (eventDate < from) return false;
         }
+        
+        // If toDate is set, event must be on or before toDate
+        if (toDate) {
+          const to = new Date(toDate);
+          to.setHours(23, 59, 59, 999); // End of day
+          if (eventDate > to) return false;
+        }
+        
+        return true;
       });
     }
 
@@ -109,7 +107,7 @@ export const useFilteredEvents = (
     console.log('📊 Final filtered results:', filtered.length, 'events');
 
     return filtered;
-  }, [events, category, searchLocation, priceRange, dateFilter, showOnlyPartnerEvents, isAiSearchActive]);
+  }, [events, category, searchLocation, priceRange, dateRange, showOnlyPartnerEvents, isAiSearchActive]); // Updated dependency
 
   // [RATIONALE]: Return plain array (not object) to fix "events.map is not a function" error
   // EventsList component expects array directly, not { filteredEvents: [...] }

@@ -12,7 +12,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 const Events = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 2000]);
-  const [selectedDate, setSelectedDate] = useState<string>('');
+  const [dateRange, setDateRange] = useState<[string, string]>(['', '']); // Changed from selectedDate
   const [showOnlyPartnerEvents, setShowOnlyPartnerEvents] = useState(false);
   const [searchLocation, setSearchLocation] = useState<string>('');
   const [aiSearchResults, setAiSearchResults] = useState<EventWithTickets[]>([]);
@@ -42,7 +42,7 @@ const Events = () => {
     selectedCategory,
     searchLocation,
     priceRange,
-    selectedDate,
+    dateRange, // Changed from selectedDate
     showOnlyPartnerEvents,
     isAiSearchActive
   );
@@ -67,7 +67,7 @@ const Events = () => {
       setAiSearchResults([]);
       setSelectedCategory('All');
       setPriceRange([0, 2000]);
-      setSelectedDate('');
+      setDateRange(['', '']); // Changed from setSelectedDate('')
       setSearchLocation('');
       return;
     }
@@ -111,7 +111,7 @@ const Events = () => {
               activeFilters={{
                 selectedCategory,
                 priceRange,
-                selectedDate,
+                dateRange, // Changed from selectedDate
                 searchLocation,
                 showOnlyPartnerEvents
               }}
@@ -163,8 +163,8 @@ const Events = () => {
                     onSelect={setSelectedCategory}
                     priceRange={priceRange}
                     onPriceRangeChange={setPriceRange}
-                    selectedDate={selectedDate}
-                    onDateChange={setSelectedDate}
+                    dateRange={dateRange} // Changed from selectedDate
+                    onDateRangeChange={setDateRange} // Changed from onDateChange
                     showOnlyPartnerEvents={showOnlyPartnerEvents}
                     onShowOnlyPartnerEventsChange={setShowOnlyPartnerEvents}
                     searchLocation={searchLocation}
@@ -212,8 +212,8 @@ const Events = () => {
                       onSelect={setSelectedCategory}
                       priceRange={priceRange}
                       onPriceRangeChange={setPriceRange}
-                      selectedDate={selectedDate}
-                      onDateChange={setSelectedDate}
+                      dateRange={dateRange} // Changed from selectedDate
+                      onDateRangeChange={setDateRange} // Changed from onDateChange
                       showOnlyPartnerEvents={showOnlyPartnerEvents}
                       onShowOnlyPartnerEventsChange={setShowOnlyPartnerEvents}
                       searchLocation={searchLocation}

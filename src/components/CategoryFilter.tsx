@@ -12,8 +12,8 @@ interface CategoryFilterProps {
   onSelect: (category: string) => void;
   priceRange: [number, number];
   onPriceRangeChange: (range: [number, number]) => void;
-  selectedDate: string;
-  onDateChange: (date: string) => void;
+  dateRange: [string, string]; // Changed from selectedDate: string
+  onDateRangeChange: (range: [string, string]) => void; // Changed from onDateChange
   showOnlyPartnerEvents: boolean;
   onShowOnlyPartnerEventsChange: (show: boolean) => void;
   searchLocation?: string;
@@ -25,8 +25,8 @@ export const CategoryFilter = ({
   onSelect,
   priceRange,
   onPriceRangeChange,
-  selectedDate,
-  onDateChange,
+  dateRange, // Changed from selectedDate
+  onDateRangeChange, // Changed from onDateChange
   showOnlyPartnerEvents,
   onShowOnlyPartnerEventsChange,
   searchLocation = "",
@@ -35,7 +35,7 @@ export const CategoryFilter = ({
   const handleReset = () => {
     onSelect("All");
     onPriceRangeChange([0, 2000]);
-    onDateChange("");
+    onDateRangeChange(["", ""]); // Changed from onDateChange("")
     onShowOnlyPartnerEventsChange(false);
     if (onLocationChange) {
       onLocationChange("");
@@ -48,7 +48,8 @@ export const CategoryFilter = ({
     selected !== "All" ||
     priceRange[0] !== 0 ||
     priceRange[1] !== 2000 ||
-    selectedDate !== "" ||
+    dateRange[0] !== "" || // Changed from selectedDate !== ""
+    dateRange[1] !== "" || // New check
     showOnlyPartnerEvents ||
     !!(searchLocation && searchLocation.trim() !== "");
 
@@ -77,7 +78,7 @@ export const CategoryFilter = ({
       )}
 
       <PriceFilter priceRange={priceRange} onPriceRangeChange={onPriceRangeChange} />
-      <DateFilter selectedDate={selectedDate} onDateChange={onDateChange} />
+      <DateFilter dateRange={dateRange} onDateRangeChange={onDateRangeChange} />
 
       <div className="flex items-center space-x-2">
         <Switch

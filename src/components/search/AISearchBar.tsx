@@ -28,7 +28,7 @@ interface AISearchBarProps {
   activeFilters?: {
     selectedCategory?: string;
     priceRange?: [number, number];
-    selectedDate?: string;
+    dateRange?: [string, string]; // Changed from selectedDate?: string
     searchLocation?: string;
     showOnlyPartnerEvents?: boolean;
   };
@@ -68,8 +68,15 @@ export const AISearchBar = ({
     if (activeFilters?.priceRange && (activeFilters.priceRange[0] > 0 || activeFilters.priceRange[1] < 2000)) {
       filters.push(`price: ${activeFilters.priceRange[0]}-${activeFilters.priceRange[1]} DKK`);
     }
-    if (activeFilters?.selectedDate) {
-      filters.push(`date: ${new Date(activeFilters.selectedDate).toLocaleDateString()}`);
+    if (activeFilters?.dateRange && (activeFilters.dateRange[0] || activeFilters.dateRange[1])) {
+      const [from, to] = activeFilters.dateRange;
+      if (from && to) {
+        filters.push(`date: ${new Date(from).toLocaleDateString()} - ${new Date(to).toLocaleDateString()}`);
+      } else if (from) {
+        filters.push(`date: from ${new Date(from).toLocaleDateString()}`);
+      } else if (to) {
+        filters.push(`date: until ${new Date(to).toLocaleDateString()}`);
+      }
     }
     if (activeFilters?.searchLocation) {
       filters.push(`location: ${activeFilters.searchLocation}`);
